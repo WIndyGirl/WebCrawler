@@ -50,8 +50,9 @@ def get_proxy_with_pac(url):
 
 def get_response(url):
 	# browser proxy: http://autoproxy.au.ibm.com/hk1.pac
-	proxy = get_proxy_with_pac(url)
+	#proxy = get_proxy_with_pac(url)
 	#proxy = {'http': '9.181.193.210:80'}
+	proxy = {}
 	if proxy == None:
 		return None
 

@@ -36,7 +36,8 @@ def set_style(name,height,bold=False):
 
 def get_response(url):
 	# add header to avoid get 403 fobbiden message
-	i_headers = {'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:41.0) Gecko/20100101 Firefox/41.0'}
+	i_headers = {'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:41.0) Gecko/20100101 Firefox/41.0',
+				'Cookie': 'lianjia_uuid=13b925fd-319a-427e-9194-926b8b62f449;lianjia_token=1.0098cd0327081814a8a234148c290c4ac6'}
 	request = urllib2.Request(url, headers = i_headers)
 
 	try:
@@ -78,12 +79,14 @@ def write_to_excel(soup, sheet, row_num):
 
 		if k < 14:
 			arr = (k-8, k-6, k-3)
+
+		default = set_style('Times New Roman',220,True)
 		for str in item_name.strings:
 			if j == 0:
 				tmp = str.split(' ')
 				l = 0;
 				while l < len(tmp):
-					sheet.write(n, m, tmp[l], set_style('Times New Roman',220,True))
+					sheet.write(n, m, tmp[l], default)
 					# update column index to next column
 					m = m + 1
 					l = l + 1
@@ -94,7 +97,7 @@ def write_to_excel(soup, sheet, row_num):
 				tmp = str.split('/')
 				l = 0;
 				while l < len(tmp) - 1:
-					sheet.write(n, m, tmp[l], set_style('Times New Roman',220,True))
+					sheet.write(n, m, tmp[l], default)
 					# update column index to next column
 					m = m + 1
 					l = l + 1
@@ -103,7 +106,7 @@ def write_to_excel(soup, sheet, row_num):
 			elif j == 2 and k < 14:
 				m = m + 1
 			elif j in arr:
-				sheet.write(n, m, str, set_style('Times New Roman',220,True))
+				sheet.write(n, m, str, default)
 				# update column index to next column
 				m = m + 1
 			# update str index to next column
@@ -136,7 +139,7 @@ def record_data_excel(url_suffix, page_count, work_book, sheet_name):
 	get_all_data(url_suffix, page_count, sheet1)
 	
 # create workbook
-work_book = xlwt.Workbook()
+work_book = xlwt.Workbook(style_compression=2)
 
 '''
 get data for '莱圳家园'
@@ -156,69 +159,74 @@ sheet_name = u'枫丹丽舍'
 # get and record data
 record_data_excel(url_suffix, page_count, work_book, sheet_name)
 
+work_book.save('LianjiaDealData.xls')
 
-# # 观景园
-# url_suffix = "c1111027374615/"
-# page_count = 5
-# sheet_name = u'观景园'
-# # get and record data
-# record_data_excel(url_suffix, page_count, work_book, sheet_name)
+# 观景园
+url_suffix = "c1111027374615/"
+page_count = 5
+sheet_name = u'观景园'
+# get and record data
+record_data_excel(url_suffix, page_count, work_book, sheet_name)
 
-# # 观林园
-# url_suffix = "c1111027374646/"
-# page_count = 7
-# sheet_name = u'观林园'
-# # get and record data
-# record_data_excel(url_suffix, page_count, work_book, sheet_name)
+# 观林园
+url_suffix = "c1111027374646/"
+page_count = 7
+sheet_name = u'观林园'
+# get and record data
+record_data_excel(url_suffix, page_count, work_book, sheet_name)
 
-# # 山水蓝维
-# url_suffix = "c1111027379551"
-# page_count = 2
-# sheet_name = u'山水蓝维'
-# # get and record data
-# record_data_excel(url_suffix, page_count, work_book, sheet_name)
+# 山水蓝维
+url_suffix = "c1111027379551"
+page_count = 2
+sheet_name = u'山水蓝维'
+# get and record data
+record_data_excel(url_suffix, page_count, work_book, sheet_name)
 
-# # 国风美唐 
-# url_suffix = "c1111043464865"
-# page_count = 2 
-# sheet_name = u'国风美唐'
-# # get and record data
-# record_data_excel(url_suffix, page_count, work_book, sheet_name)
+# 国风美唐 
+url_suffix = "c1111043464865"
+page_count = 2 
+sheet_name = u'国风美唐'
+# get and record data
+record_data_excel(url_suffix, page_count, work_book, sheet_name)
 
-# # 新龙城
-# url_suffix = "c1111027381003"
-# page_count = 35
-# sheet_name = u'新龙城'
-# # get and record data
-# record_data_excel(url_suffix, page_count, work_book, sheet_name)
+work_book.save('LianjiaDealData.xls')
 
-# # 流星花园三区
-# url_suffix = "c1111027378138"
-# page_count = 19
-# sheet_name = u'流星花园三区'
-# # get and record data
-# record_data_excel(url_suffix, page_count, work_book, sheet_name)
+# 新龙城
+url_suffix = "c1111027381003"
+page_count = 35
+sheet_name = u'新龙城'
+# get and record data
+record_data_excel(url_suffix, page_count, work_book, sheet_name)
 
-# # 当代城市家园
-# url_suffix = "c1111027376795"
-# page_count = 11
-# sheet_name = u'当代城市家园'
-# # get and record data
-# record_data_excel(url_suffix, page_count, work_book, sheet_name)
+# 流星花园三区
+url_suffix = "c1111027378138"
+page_count = 19
+sheet_name = u'流星花园三区'
+# get and record data
+record_data_excel(url_suffix, page_count, work_book, sheet_name)
 
-# # 上地东里
-# url_suffix = "c1111046342806"
-# page_count = 12
-# sheet_name = u'上地东里'
-# # get and record data
-# record_data_excel(url_suffix, page_count, work_book, sheet_name)
+work_book.save('LianjiaDealData.xls')
 
-# # 上地西里
-# url_suffix = "c1111027379186"
-# page_count = 4
-# sheet_name = u'上地西里'
-# # get and record data
-# record_data_excel(url_suffix, page_count, work_book, sheet_name)
+# 当代城市家园
+url_suffix = "c1111027376795"
+page_count = 11
+sheet_name = u'当代城市家园'
+# get and record data
+record_data_excel(url_suffix, page_count, work_book, sheet_name)
+
+# 上地东里
+url_suffix = "c1111046342806"
+page_count = 12
+sheet_name = u'上地东里'
+# get and record data
+record_data_excel(url_suffix, page_count, work_book, sheet_name)
+
+# 上地西里
+url_suffix = "c1111027379186"
+page_count = 4
+sheet_name = u'上地西里'
+# get and record data
+record_data_excel(url_suffix, page_count, work_book, sheet_name)
 
 # save the recorded data
 work_book.save('LianjiaDealData.xls')
