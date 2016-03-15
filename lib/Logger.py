@@ -8,7 +8,7 @@ class Logger:
 	def __init__(self, logname, loglevel, logger):
 		# create logger
 		self.logger = logging.getLogger(logger)
-		self.logger.setLevel(loging.DEBUG)
+		self.logger.setLevel(logging.DEBUG)
 
 		# create handler to write log to file
 		fh = logging.FileHandler(logname)

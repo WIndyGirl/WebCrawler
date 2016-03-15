@@ -1,23 +1,27 @@
 #!/usr/bin/python
-# -*- coding:utf-8 -*-  
+# -*- coding:utf-8 -*-
 
 import sys
-import socket
+import os
+file_path = (os.path.abspath(__file__))
+sys.path.append(os.path.dirname(file_path) + "/../")
+
 import urllib2
 import xlwt
 import xlrd
 from xlutils.copy import copy
-# import DealDataHandler
-# import DBhandler
-# import Logger
 from bs4 import BeautifulSoup
 import datetime
 import re
 import json
 
+import db.mysql.DealDataHandler as DealDataHandler
+from db.mysql.DBHandler import DBHandler
+from lib.Logger import Logger
+
 class LianjiaHisStatisticsData:
-	#def __init__(self):
-		# self.logger = Logger(logname='/var/log/houseData.log', loglevel=1, logger="houseDataLogger").getLogger()
+	def __init__(self):
+		self.logger = Logger(logname='/var/log/houseData.log', loglevel=1, logger="houseDataLogger").getLogger()
 
 	def get_response(self, url):
 		# add header to avoid get 403 fobbiden message
@@ -57,7 +61,7 @@ class LianjiaHisStatisticsData:
 				values.append(re.sub("\D", "", data))
 			# i == 3: data = '最近90天内成交房源35399套'
 			elif i == 3:
-				values.append(re.sub("\D", "", data)[2:])	
+				values.append(re.sub("\D", "", data)[2:])
 			i = i + 1
 
 		# get statistics data on yesterday
@@ -80,13 +84,13 @@ class LianjiaHisStatisticsData:
 
 	'''
 	set the cell style
-	''' 
+	'''
 	def set_style(self, name,height,bold=False):
-		# init style 
-		style = xlwt.XFStyle() 
+		# init style
+		style = xlwt.XFStyle()
 
 		# create font for style
-		font = xlwt.Font() 
+		font = xlwt.Font()
 		font.name = name # 'Times New Roman'
 		#font.bold = bold
 		font.color_index = 4
@@ -108,15 +112,15 @@ class LianjiaHisStatisticsData:
 		row_num = work_book.sheet_by_index(0).nrows
 
 		nwb = copy(work_book)
-		sheet1 = nwb.get_sheet(0)		
+		sheet1 = nwb.get_sheet(0)
 
 		for i in range(0,len(values)):
-			sheet1.write(row_num, i, values[i], self.set_style('Times New Roman',220,True))
+			sheet1.write(row_num, i, values[i], self.set_style('Arial',220,True))
 
 		nwb.save(file_name)
 
 	def create_excel(self, file_name, sheet_name):
-		work_book = xlwt.Workbook(style_compression=2)	
+		work_book = xlwt.Workbook(style_compression=2)
 		sheet1 = work_book.add_sheet(sheet_name, cell_overwrite_ok=True)
 
 		row0 = [u'记录时间', u'在售房源', u'90天成交房源', u'昨日成交', u'昨日带看', u'昨日新增房源', u'昨日新增房客' ]
@@ -133,8 +137,8 @@ if __name__ == '__main__':
 
 	print values
 
-	hisStatisData.create_excel('LianJiaHisStatisData.xls', 'sheet1')
+#	hisStatisData.create_excel('LianJiaHisStatisData.xls', 'sheet1')
 
-	hisStatisData.write_to_excel('LianJiaHisStatisData.xls', values)
+	hisStatisData.write_to_excel('../docs/LianJiaHisStatisData.xls', values)
 
 

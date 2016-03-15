@@ -1,21 +1,21 @@
 #!/usr/bin/python
-# -*- coding:utf-8 -*-  
+# -*- coding:utf-8 -*-
 
 import sys
-# import socket
+import os
+file_path = (os.path.abspath(__file__))
+sys.path.append(os.path.dirname(file_path) + "/../")
+
 import urllib2
 import datetime
-import re
-import json
 import xlwt
 import xlrd
 from xlutils.copy import copy
 from bs4 import BeautifulSoup
 
-# import DealDataHandler
-# import DBhandler
-# import Logger
-
+import db.mysql.DealDataHandler as DealDataHandler
+from db.mysql.DBHandler import DBHandler
+from lib.Logger import Logger
 
 class VillageHisStatisData:
 	#def __init__(self):
@@ -71,13 +71,13 @@ class VillageHisStatisData:
 
 		'''
 	set the cell style
-	''' 
+	'''
 	def set_style(self, name,height,bold=False):
-		# init style 
-		style = xlwt.XFStyle() 
+		# init style
+		style = xlwt.XFStyle()
 
 		# create font for style
-		font = xlwt.Font() 
+		font = xlwt.Font()
 		font.name = name # 'Times New Roman'
 		#font.bold = bold
 		font.color_index = 4
@@ -99,7 +99,7 @@ class VillageHisStatisData:
 		row_num = work_book.sheet_by_index(0).nrows
 
 		nwb = copy(work_book)
-		sheet1 = nwb.get_sheet(0)		
+		sheet1 = nwb.get_sheet(0)
 
 		for i in range(0, len(values)):
 			for j in range(0,len(values[i])):
@@ -108,7 +108,7 @@ class VillageHisStatisData:
 		nwb.save(file_name)
 
 	def create_excel(self, file_name, sheet_name):
-		work_book = xlwt.Workbook(style_compression=2)	
+		work_book = xlwt.Workbook(style_compression=2)
 		sheet1 = work_book.add_sheet(sheet_name, cell_overwrite_ok=True)
 
 		row0 = [u'记录时间', u'小区名称', u'成交均价', u'在售房源', u'90天成交房源', u'30天带看量' ]
@@ -122,7 +122,7 @@ if __name__ == '__main__':
 	hisStatisData = VillageHisStatisData()
 
 	common_url = 'http://bj.lianjia.com/ershoufang/'
-	village_infos = (("c1111027378224", 9, u'莱圳家园'), ("c1111027374195", 7, u'枫丹丽舍'), ("c1111027374615", 5, u'观景园'), 
+	village_infos = (("c1111027378224", 9, u'莱圳家园'), ("c1111027374195", 7, u'枫丹丽舍'), ("c1111027374615", 5, u'观景园'),
 		("c1111027374646", 7, u'观林园'), ("c1111027379551", 2,  u'山水蓝维'), ("c1111043464865", 2, u'国风美唐'),
 		("c1111027381003", 35, u'新龙城'), ("c1111027378138", 19, u'流星花园三区'), ("c1111027376795", 11, u'当代城市家园'),
 		("c1111046342806", 12, u'上地东里'), ("c1111027379186", 4, u'上地西里'))

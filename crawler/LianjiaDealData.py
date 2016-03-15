@@ -1,23 +1,19 @@
 #!/usr/bin/python
-# -*- coding:utf-8 -*-  
+# -*- coding:utf-8 -*-
 
 import sys
+import os
+file_path = (os.path.abspath(__file__))
+sys.path.append(os.path.dirname(file_path) + "/../")
 
-#base_dir = os.path.dirname(os.path.abspath(__file__))
-
-project_dir = '/Users/huangweiping/workspace-python/WebCrawler/'
-# 
-sys.path.append(project_dir)
-print(sys.path)
-
-import socket
 import urllib2
 import xlwt
 import xlrd
-import DealDataHandler 
-# import DBhandler
-# import Logger 
 from bs4 import BeautifulSoup
+
+import db.mysql.DealDataHandler as DealDataHandler
+from db.mysql.DBHandler import DBHandler
+from lib.Logger import Logger
 
 class LianjiaDealData:
 	# def __init__(self):
@@ -25,13 +21,13 @@ class LianjiaDealData:
 
 	'''
 	set the cell style
-	''' 
+	'''
 	def set_style(self, name,height,bold=False):
-		# init style 
-		style = xlwt.XFStyle() 
+		# init style
+		style = xlwt.XFStyle()
 
 		# create font for style
-		font = xlwt.Font() 
+		font = xlwt.Font()
 		font.name = name # 'Times New Roman'
 		#font.bold = bold
 		font.color_index = 4
@@ -55,7 +51,7 @@ class LianjiaDealData:
 		values = None
 
 		for item_name in soup.findAll('div', {'class': 'info-panel'}):
-			print 'Writing %s row' % n 
+			print 'Writing %s row' % n
 			# str index
 			j = 0
 			# cloumn index
@@ -110,13 +106,13 @@ class LianjiaDealData:
 			values[n] = value
 
 		DealDataHandler.insert_deal_data(conn, values)
-		
-		
+
+
 	def write_to_excel(self, soup, sheet, row_num):
 		# row index
 		n = row_num
 		for item_name in soup.findAll('div', {'class': 'info-panel'}):
-			print 'Writing %s row' % n 
+			print 'Writing %s row' % n
 			# str index
 			j = 0
 			# cloumn index
@@ -203,7 +199,7 @@ class LianjiaDealData:
 			if db_excel == 'db':
 				self.insert_into_db(soup, dest)
 			elif db_excel == 'excel':
-				self.write_to_excel(soup, dest, (i - 1) * 30 + 1) 
+				self.write_to_excel(soup, dest, (i - 1) * 30 + 1)
 
 			i = i + 1
 
@@ -211,8 +207,8 @@ class LianjiaDealData:
 		if sheet_name == "":
 			print 'Invalid sheet name'
 			return None
-		# create sheet 
-		sheet1 = work_book.add_sheet(sheet_name, cell_overwrite_ok=True) 
+		# create sheet
+		sheet1 = work_book.add_sheet(sheet_name, cell_overwrite_ok=True)
 		# set row title
 		row0 = [u'小区名',u'户型',u'面积(平米)',u'朝向',u'楼层',u'是否满五唯一',u'成交日期',u'单价(元/平)', u'总价(万)']
 
@@ -234,17 +230,17 @@ if __name__ == '__main__':
 
 	village_infos = (("c1111027378224", 9, u'莱圳家园'))
 
-	# village_infos = (("c1111027378224", 9, u'莱圳家园'), ("c1111027374195", 7, u'枫丹丽舍'), ("c1111027374615", 5, u'观景园'), 
+	# village_infos = (("c1111027378224", 9, u'莱圳家园'), ("c1111027374195", 7, u'枫丹丽舍'), ("c1111027374615", 5, u'观景园'),
 	# 	("c1111027374646", 7, u'观林园'), ("c1111027379551", 2,  u'山水蓝维'), ("c1111043464865", 2, u'国风美唐'),
 	# 	("c1111027381003", 35, u'新龙城'), ("c1111027378138", 19, u'流星花园三区'), ("c1111027376795", 11, u'当代城市家园'),
 	# 	("c1111046342806", 12, u'上地东里'), ("c1111027379186", 4, u'上地西里'))
-	
+
 	'''
 	Write to Excel
 	'''
 	# create workbook
 	work_book = xlwt.Workbook(style_compression=2)
-	for info in village_infos:	
+	for info in village_infos:
 		# get and record data
 		ljDealData.record_data_excel(info[0], info[1], work_book, info[2])
 	# save the recorded data
@@ -263,9 +259,9 @@ if __name__ == '__main__':
 
 	# 0 莱圳家园 1室2厅 71平米
 	# 1 南 / 高楼层(共18层) / 2012板塔结合
-	# 2 房本满两年 
-	# 3 永泰小学 
-	# 4 距8号线西小口372米 
+	# 2 房本满两年
+	# 3 永泰小学
+	# 4 距8号线西小口372米
 	# 5 查看同户型成交记录z
 	# 6 2015.10.18
 	# 7 链家网签约

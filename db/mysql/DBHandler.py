@@ -2,14 +2,18 @@
 #-*- coding: utf-8 -*-
 
 import sys
+import os
+file_path = (os.path.abspath(__file__))
+sys.path.append(os.path.dirname(file_path) + "/../")
+
 import MySQLdb
-import lib.Logger
+import lib.Logger as Logger
 
 class DBHandler:
 	def __init__(self):
 		self.logger = Logger(logname='/var/log/houseData.log', loglevel=1, logger="houseDataLogger").getLogger()
 
-	def get_db_conn(db_name, user_name, password):
+	def get_db_conn(self, db_name, user_name, password):
 		conn = None
 		try:
 			conn = MySQLdb.connect(host='localhost', user=user_name, passwd=password, db=db_name, port=3306, charset='utf8')
