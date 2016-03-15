@@ -6,8 +6,11 @@ import os
 file_path = (os.path.abspath(__file__))
 sys.path.append(os.path.dirname(file_path) + "/../")
 
+reload(sys)
+sys.setdefaultencoding('utf-8')
+
 import MySQLdb
-import lib.Logger as Logger
+from lib.Logger import Logger
 
 class DBHandler:
 	def __init__(self):
@@ -17,8 +20,10 @@ class DBHandler:
 		conn = None
 		try:
 			conn = MySQLdb.connect(host='localhost', user=user_name, passwd=password, db=db_name, port=3306, charset='utf8')
+			return conn
 		except MySQLdb.Error, e:
 			self.logger.error("Mysql Error %d: %s" % (e.args[0], e.args[1]))
+			sys.exit(-1)
 
 
 	def close_db_conn(self, conn):

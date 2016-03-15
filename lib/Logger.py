@@ -35,7 +35,7 @@ class Logger:
 
 		# add handler to logger
 		self.logger.addHandler(fh)
-		self.logger.addHandler(ch)
+		# self.logger.addHandler(ch)
 
 	def getLogger(self):
 		return self.logger

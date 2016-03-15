@@ -17,7 +17,7 @@ from lib.Logger import Logger
 
 class LianjiaDealData:
 	def __init__(self):
-		self.logger = Logger(logname='houseData.log', loglevel=1, logger="houseDataLogger").getLogger()
+		self.logger = Logger(logname='/var/log/houseData.log', loglevel=1, logger="houseDataLogger").getLogger()
 
 	'''
 	set the cell style
@@ -250,9 +250,10 @@ if __name__ == '__main__':
 	'''
 	Record in db
 	'''
-	dbHandler = new DBhandler()
+	dbHandler = DBHandler()
 	# create db connection
 	conn = dbHandler.get_db_conn('house_data', 'root', 'passw0rd')
+	print conn
 	for info in village_infos:
 		ljDealData.record_data_db(info[0], info[1], conn)
 
