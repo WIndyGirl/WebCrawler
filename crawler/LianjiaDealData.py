@@ -16,8 +16,8 @@ from db.mysql.DBHandler import DBHandler
 from lib.Logger import Logger
 
 class LianjiaDealData:
-	# def __init__(self):
-	# 	self.logger = Logger(logname='/var/log/houseData.log', loglevel=1, logger="houseDataLogger").getLogger()
+	def __init__(self):
+		self.logger = Logger(logname='houseData.log', loglevel=1, logger="houseDataLogger").getLogger()
 
 	'''
 	set the cell style
@@ -29,6 +29,7 @@ class LianjiaDealData:
 		# create font for style
 		font = xlwt.Font()
 		font.name = name # 'Times New Roman'
+		font.size = 10
 		#font.bold = bold
 		font.color_index = 4
 		font.height = height
@@ -46,12 +47,12 @@ class LianjiaDealData:
 
 	def insert_into_db(self, soup, conn):
 		# row index
-		n = row_num
+		n = 0
 		# tunple for values to insert db
-		values = None
+		values = []
 
 		for item_name in soup.findAll('div', {'class': 'info-panel'}):
-			print 'Writing %s row' % n
+			self.logger.info('Collecting %s row' % n)
 			# str index
 			j = 0
 			# cloumn index
@@ -74,7 +75,7 @@ class LianjiaDealData:
 					tmp = str.split(' ')
 					l = 0;
 					while l < len(tmp):
-						value[m] = tmp[l]
+						value.append(tmp[l])
 						# update column index to next column
 						m = m + 1
 						l = l + 1
@@ -85,34 +86,36 @@ class LianjiaDealData:
 					tmp = str.split('/')
 					l = 0;
 					while l < len(tmp) - 1:
-						value[m] = tmp[l]
+						value.append(tmp[l])
 						# update column index to next column
 						m = m + 1
 						l = l + 1
 					if f:
-						values[m] = ''
+						value.append('')
 						m = m + 1
 				elif j == 2 and k < 14:
-					values[m] = ''
+					value.append('')
 					m = m + 1
 				elif j in arr:
-					value[m] = str
+					value.append(str)
 					# update column index to next column
 					m = m + 1
 				# update str index to next column
 				j = j + 1
-			# update row index to the nexe row
+			values.append(value)
+			# update row index to the next row
 			n = n + 1
-			values[n] = value
+		self.logger.info('%s rows data has been collected; the length of list stores the collected data is %s' % (n, len(values)))
+		self.logger.info('the collected data is: %s' % values)
 
-		DealDataHandler.insert_deal_data(conn, values)
+		DealDataHandler.insert_deal_data(conn, tuple(values))
 
 
 	def write_to_excel(self, soup, sheet, row_num):
 		# row index
 		n = row_num
 		for item_name in soup.findAll('div', {'class': 'info-panel'}):
-			print 'Writing %s row' % n
+			self.logger.info('Collecting %s row' % n)
 			# str index
 			j = 0
 			# cloumn index
@@ -162,6 +165,7 @@ class LianjiaDealData:
 				j = j + 1
 			# update row index to the nexe row
 			n = n + 1
+		self.logger.info('the collected data is: %s' % n)
 
 	def get_response(self, url):
 		# add header to avoid get 403 fobbiden message
@@ -182,7 +186,7 @@ class LianjiaDealData:
 		if response == None:
 			return None
 
-		print 'Read source code'
+		self.logger.info('Read HTML source code')
 		html = response.read()
 		soup = BeautifulSoup(html, 'html.parser')
 
@@ -205,7 +209,7 @@ class LianjiaDealData:
 
 	def record_data_excel(self, url_suffix, page_count, work_book, sheet_name):
 		if sheet_name == "":
-			print 'Invalid sheet name'
+			self.logger.error('Invalid sheet name')
 			return None
 		# create sheet
 		sheet1 = work_book.add_sheet(sheet_name, cell_overwrite_ok=True)
@@ -219,16 +223,13 @@ class LianjiaDealData:
 		self.get_all_data(url_suffix, page_count, sheet1, 'excel')
 
 	def record_data_db(self, url_suffix, page_count, conn):
-		if sheet_name == "":
-			print 'Invalid sheet name'
-			return None
 
 		self.get_all_data(url_suffix, page_count, conn, 'db')
 
 if __name__ == '__main__':
 	ljDealData = LianjiaDealData()
 
-	village_infos = (("c1111027378224", 9, u'莱圳家园'))
+	village_infos = (('c1111027378224', 1, u'莱圳家园'), ('c1111027374195', 1, u'枫丹丽舍'))
 
 	# village_infos = (("c1111027378224", 9, u'莱圳家园'), ("c1111027374195", 7, u'枫丹丽舍'), ("c1111027374615", 5, u'观景园'),
 	# 	("c1111027374646", 7, u'观林园'), ("c1111027379551", 2,  u'山水蓝维'), ("c1111043464865", 2, u'国风美唐'),
@@ -238,24 +239,24 @@ if __name__ == '__main__':
 	'''
 	Write to Excel
 	'''
-	# create workbook
-	work_book = xlwt.Workbook(style_compression=2)
-	for info in village_infos:
-		# get and record data
-		ljDealData.record_data_excel(info[0], info[1], work_book, info[2])
-	# save the recorded data
-	work_book.save('LianjiaDealData.xls')
-
-	# '''
-	# Record in db
-	# '''
-	# dbHandler = new DBhandler()
-	# # create db connection
-	# conn = dbHandler.get_db_conn('house_data', 'root', 'passw0rd')
+	# # create workbook
+	# work_book = xlwt.Workbook(style_compression=2)
 	# for info in village_infos:
-	# 	ljDealData.record_data_db(info[0], info[1], conn)
+	# 	# get and record data
+	# 	ljDealData.record_data_excel(info[0], info[1], work_book, info[2])
+	# # save the recorded data
+	# work_book.save('LianjiaDealData.xls')
 
-	# dbHandler.close_db_conn(conn)
+	'''
+	Record in db
+	'''
+	dbHandler = new DBhandler()
+	# create db connection
+	conn = dbHandler.get_db_conn('house_data', 'root', 'passw0rd')
+	for info in village_infos:
+		ljDealData.record_data_db(info[0], info[1], conn)
+
+	dbHandler.close_db_conn(conn)
 
 	# 0 莱圳家园 1室2厅 71平米
 	# 1 南 / 高楼层(共18层) / 2012板塔结合

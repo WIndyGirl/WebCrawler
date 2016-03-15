@@ -137,8 +137,8 @@ if __name__ == '__main__':
 		values.append(value)
 	print values
 
-	hisStatisData.create_excel('VillageHisStatisData.xls', 'sheet1')
+	# hisStatisData.create_excel('VillageHisStatisData.xls', 'sheet1')
 
-	hisStatisData.write_to_excel('VillageHisStatisData.xls', values)
+	hisStatisData.write_to_excel('../docs/VillageHisStatisData.xls', values)
 
 
