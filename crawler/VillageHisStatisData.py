@@ -13,13 +13,13 @@ import xlrd
 from xlutils.copy import copy
 from bs4 import BeautifulSoup
 
-import db.mysql.DealDataHandler as DealDataHandler
+import db.mysql.VillageHisStatisDataHandler as VillageHisStatisDataHandler
 from db.mysql.DBHandler import DBHandler
 from lib.Logger import Logger
 
 class VillageHisStatisData:
-	#def __init__(self):
-		# self.logger = Logger(logname='/var/log/houseData.log', loglevel=1, logger="houseDataLogger").getLogger()
+	def __init__(self):
+		self.logger = Logger(logname='/var/log/houseData.log', loglevel=1, logger="houseDataLogger").getLogger()
 
 	def get_response(self, url):
 		# add header to avoid get 403 fobbiden message
@@ -29,7 +29,7 @@ class VillageHisStatisData:
 		try:
 			response = urllib2.urlopen(request)
 		except Exception, e:
-			sys.stderr.write(str(e) + '\n')
+			self.logger.error(str(e) + '\n')
 			return None
 
 		return response
@@ -39,7 +39,7 @@ class VillageHisStatisData:
 		if response == None:
 			return None
 
-		print 'Read source code'
+		self.logger.info('Read source code')
 		html = response.read()
 		soup = BeautifulSoup(html, 'html.parser')
 
@@ -67,9 +67,10 @@ class VillageHisStatisData:
 
 			i = i + 1
 
+		self.logger.debug("The statistics data got for %s is: %s " % (village_name, values) )
 		return values
 
-		'''
+	'''
 	set the cell style
 	'''
 	def set_style(self, name,height,bold=False):
@@ -118,6 +119,9 @@ class VillageHisStatisData:
 
 		work_book.save(file_name)
 
+	def record_into_db(self, conn, values):
+		VillageHisStatisDataHandler.insert_village_his_statistics_data(conn, values)
+
 if __name__ == '__main__':
 	hisStatisData = VillageHisStatisData()
 
@@ -135,10 +139,20 @@ if __name__ == '__main__':
 		value = hisStatisData.get_statistics_data(url, info[2])
 
 		values.append(value)
-	print values
 
 	# hisStatisData.create_excel('VillageHisStatisData.xls', 'sheet1')
-
+	# write data into excel
 	hisStatisData.write_to_excel('../docs/VillageHisStatisData.xls', values)
+
+	'''
+	Record data into db
+	'''
+	dbHandler = DBHandler()
+	# create db connection
+	conn = dbHandler.get_db_conn('house_data', 'root', 'passw0rd')
+	# insert data into db
+	hisStatisData.record_into_db(conn, values)
+	# close db connection
+	dbHandler.close_db_conn(conn)
 
 

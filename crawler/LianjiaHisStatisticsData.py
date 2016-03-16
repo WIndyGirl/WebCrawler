@@ -15,7 +15,7 @@ import datetime
 import re
 import json
 
-import db.mysql.DealDataHandler as DealDataHandler
+import db.mysql.HistoryStatisticsDataHandler as HistoryStatisticsDataHandler
 from db.mysql.DBHandler import DBHandler
 from lib.Logger import Logger
 
@@ -31,7 +31,7 @@ class LianjiaHisStatisticsData:
 		try:
 			response = urllib2.urlopen(request)
 		except Exception, e:
-			sys.stderr.write(str(e) + '\n')
+			self.logger.error(str(e) + '\n')
 			return None
 
 		return response
@@ -41,7 +41,7 @@ class LianjiaHisStatisticsData:
 		if response == None:
 			return None
 
-		print 'Read source code'
+		self.logger.info('Read source code')
 		html = response.read()
 		soup = BeautifulSoup(html, 'html.parser')
 
@@ -79,6 +79,8 @@ class LianjiaHisStatisticsData:
 
 		values.append(house_amount[-1])
 		values.append(customer_amount[-1])
+
+		self.logger.debug("The statistics data got is: %s " % values )
 
 		return values
 
@@ -130,15 +132,30 @@ class LianjiaHisStatisticsData:
 
 		work_book.save(file_name)
 
+	def record_into_db(self, conn, values):
+		HistoryStatisticsDataHandler.insert_history_statistics_data(conn, values)
+
 if __name__ == '__main__':
 	hisStatisData = LianjiaHisStatisticsData()
 	url = 'http://bj.lianjia.com/fangjia/'
+	# get statistics data
 	values = hisStatisData.get_statistics_data(url)
 
-	print values
-
-#	hisStatisData.create_excel('LianJiaHisStatisData.xls', 'sheet1')
-
+	# create excel
+	# hisStatisData.create_excel('LianJiaHisStatisData.xls', 'sheet1')
+	# write collected data into excel
 	hisStatisData.write_to_excel('../docs/LianJiaHisStatisData.xls', values)
+
+	'''
+	Record data into db
+	'''
+	dbHandler = DBHandler()
+	# create db connection
+	conn = dbHandler.get_db_conn('house_data', 'root', 'passw0rd')
+	# insert data into db
+	hisStatisData.record_into_db(conn, values)
+	# close db connection
+	dbHandler.close_db_conn(conn)
+
 
 
