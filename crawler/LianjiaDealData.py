@@ -6,6 +6,7 @@ import os
 file_path = (os.path.abspath(__file__))
 sys.path.append(os.path.dirname(file_path) + "/../")
 
+import re
 import urllib2
 import xlwt
 import xlrd
@@ -45,7 +46,7 @@ class LianjiaDealData:
 
 		return style
 
-	def insert_into_db(self, soup, conn):
+	def get_deal_data(self, soup):
 		# row index
 		n = 0
 		# tunple for values to insert db
@@ -60,14 +61,14 @@ class LianjiaDealData:
 			# flag for data from other agent
 			f = False
 			# array to get the column value
-			arr = (2, 6, 8, 11)
+			arr = (2, 8, 11)
 			# len of item_name.strings
 			k = 0
 			for str in item_name.strings:
 				k = k + 1
 
 			if k < 14:
-				arr = (k-8, k-6, k-3)
+				arr = (k-6, k-3)
 
 			value = []
 			for str in item_name.strings:
@@ -75,13 +76,17 @@ class LianjiaDealData:
 					tmp = str.split(' ')
 					l = 0;
 					while l < len(tmp):
-						value.append(tmp[l])
+						# 71平米 --> 71
+						if l == 2:
+							value.append(re.sub('\D', '', tmp[l]))
+						else:
+							value.append(tmp[l])
 						# update column index to next column
 						m = m + 1
 						l = l + 1
 				elif j == 1 and str == u'历史成交，暂无详情页':
 					f = True
-					arr = (k-8, k-6, k-3)
+					arr = (k-6, k-3)
 				elif j == 1 or (j == 2 and f):
 					tmp = str.split('/')
 					l = 0;
@@ -96,6 +101,11 @@ class LianjiaDealData:
 				elif j == 2 and k < 14:
 					value.append('')
 					m = m + 1
+				elif j == k - 8:
+					if len(str) == 7:
+						str = str + '.01'
+					value.append(str)
+					m = m + 1
 				elif j in arr:
 					value.append(str)
 					# update column index to next column
@@ -108,64 +118,7 @@ class LianjiaDealData:
 		self.logger.info('%s rows data has been collected; the length of list stores the collected data is %s' % (n, len(values)))
 		self.logger.info('the collected data is: %s' % values)
 
-		DealDataHandler.insert_deal_data(conn, tuple(values))
-
-
-	def write_to_excel(self, soup, sheet, row_num):
-		# row index
-		n = row_num
-		for item_name in soup.findAll('div', {'class': 'info-panel'}):
-			self.logger.info('Collecting %s row' % n)
-			# str index
-			j = 0
-			# cloumn index
-			m = 0
-			# flag for data from other agent
-			f = False
-			# array to get the column value
-			arr = (2, 6, 8, 11)
-			# len of item_name.strings
-			k = 0
-			for str in item_name.strings:
-				k = k + 1
-
-			if k < 14:
-				arr = (k-8, k-6, k-3)
-
-			default = self.set_style('Times New Roman',220,True)
-			for str in item_name.strings:
-				if j == 0:
-					tmp = str.split(' ')
-					l = 0;
-					while l < len(tmp):
-						sheet.write(n, m, tmp[l], default)
-						# update column index to next column
-						m = m + 1
-						l = l + 1
-				elif j == 1 and str == u'历史成交，暂无详情页':
-					f = True
-					arr = (k-8, k-6, k-3)
-				elif j == 1 or (j == 2 and f):
-					tmp = str.split('/')
-					l = 0;
-					while l < len(tmp) - 1:
-						sheet.write(n, m, tmp[l], default)
-						# update column index to next column
-						m = m + 1
-						l = l + 1
-					if f:
-						m = m + 1
-				elif j == 2 and k < 14:
-					m = m + 1
-				elif j in arr:
-					sheet.write(n, m, str, default)
-					# update column index to next column
-					m = m + 1
-				# update str index to next column
-				j = j + 1
-			# update row index to the nexe row
-			n = n + 1
-		self.logger.info('the collected data is: %s' % n)
+		return values
 
 	def get_response(self, url):
 		# add header to avoid get 403 fobbiden message
@@ -181,7 +134,7 @@ class LianjiaDealData:
 
 		return response
 
-	def get_single_page_data(self, item_url):
+	def get_single_page_html(self, item_url):
 		response = self.get_response(item_url)
 		if response == None:
 			return None
@@ -192,39 +145,45 @@ class LianjiaDealData:
 
 		return soup
 
-	def get_all_data(self, url_suffix, page_count, dest, db_excel):
+	def get_all_data(self, url_suffix, page_count):
 		url_common_part = "http://bj.lianjia.com/chengjiao/"
-		url = None
+		values = []
+
 		i = 1
 		while i <= page_count:
 			url = url_common_part + "pg" + str(i) + url_suffix
-			soup = self.get_single_page_data(url)
-
-			if db_excel == 'db':
-				self.insert_into_db(soup, dest)
-			elif db_excel == 'excel':
-				self.write_to_excel(soup, dest, (i - 1) * 30 + 1)
+			soup = self.get_single_page_html(url)
+			values = values + self.get_deal_data(soup)
 
 			i = i + 1
 
-	def record_data_excel(self, url_suffix, page_count, work_book, sheet_name):
+		return values
+
+	def record_data_excel(self, values, work_book, sheet_name):
 		if sheet_name == "":
 			self.logger.error('Invalid sheet name')
 			return None
+
+		if values == [] or values == None:
+			self.logger.error('No data provided to record')
+			return None
+
 		# create sheet
 		sheet1 = work_book.add_sheet(sheet_name, cell_overwrite_ok=True)
 		# set row title
 		row0 = [u'小区名',u'户型',u'面积(平米)',u'朝向',u'楼层',u'是否满五唯一',u'成交日期',u'单价(元/平)', u'总价(万)']
 
+		default = self.set_style('Times New Roman',220,True)
 		# write the first row
 		for i in range(0,len(row0)):
-			sheet1.write(0,i,row0[i],self.set_style('Times New Roman',220,True))
+			sheet1.write(0, i, row0[i], default)
+		
+		for i in range(1, len(values)):
+			for j in range(0, len(values[i])):
+				sheet1.write(i, j, values[i][j], default)
 
-		self.get_all_data(url_suffix, page_count, sheet1, 'excel')
-
-	def record_data_db(self, url_suffix, page_count, conn):
-
-		self.get_all_data(url_suffix, page_count, conn, 'db')
+	def record_data_db(self, values, conn):
+		DealDataHandler.insert_deal_data(conn, values)
 
 if __name__ == '__main__':
 	ljDealData = LianjiaDealData()
@@ -239,11 +198,13 @@ if __name__ == '__main__':
 	'''
 	Write to Excel
 	'''
-	# # create workbook
+	# create workbook
 	# work_book = xlwt.Workbook(style_compression=2)
-	# for info in village_infos:
-	# 	# get and record data
-	# 	ljDealData.record_data_excel(info[0], info[1], work_book, info[2])
+	# # get data and record in excel
+	# for info in village_infos:		
+	# 	values = ljDealData.get_all_data(info[0], info[1])
+	# 	ljDealData.record_data_excel(values, work_book, info[2])
+
 	# # save the recorded data
 	# work_book.save('LianjiaDealData.xls')
 
@@ -253,9 +214,10 @@ if __name__ == '__main__':
 	dbHandler = DBHandler()
 	# create db connection
 	conn = dbHandler.get_db_conn('house_data', 'root', 'passw0rd')
-	print conn
+	# get data and insert into db
 	for info in village_infos:
-		ljDealData.record_data_db(info[0], info[1], conn)
+		values = ljDealData.get_all_data(info[0], info[1])	
+		ljDealData.record_data_db(values, conn)
 
 	dbHandler.close_db_conn(conn)
 
