@@ -4,7 +4,7 @@
 import sys
 import os
 file_path = (os.path.abspath(__file__))
-sys.path.append(os.path.dirname(file_path) + "/../")
+sys.path.append(os.path.dirname(file_path) + '/../')
 
 import urllib2
 import datetime
@@ -19,7 +19,7 @@ from lib.Logger import Logger
 
 class VillageHisStatisData:
 	def __init__(self):
-		self.logger = Logger(logname='/var/log/houseData.log', loglevel=1, logger="houseDataLogger").getLogger()
+		self.logger = Logger(logname='/var/log/houseData.log', loglevel=1, logger='houseDataLogger').getLogger()
 
 	def get_response(self, url):
 		# add header to avoid get 403 fobbiden message
@@ -67,7 +67,7 @@ class VillageHisStatisData:
 
 			i = i + 1
 
-		self.logger.debug("The statistics data got for %s is: %s " % (village_name, values) )
+		self.logger.debug('The statistics data got for %s is: %s ' % (village_name, values) )
 		return values
 
 	'''
@@ -126,11 +126,17 @@ if __name__ == '__main__':
 	hisStatisData = VillageHisStatisData()
 
 	common_url = 'http://bj.lianjia.com/ershoufang/'
-	village_infos = (("c1111027378224", 9, u'莱圳家园'), ("c1111027374195", 7, u'枫丹丽舍'), ("c1111027374615", 5, u'观景园'),
-		("c1111027374646", 7, u'观林园'), ("c1111027379551", 2,  u'山水蓝维'), ("c1111043464865", 2, u'国风美唐'),
-		("c1111027381003", 35, u'新龙城'), ("c1111027378138", 19, u'流星花园三区'), ("c1111027376795", 11, u'当代城市家园'),
-		("c1111046342806", 12, u'上地东里'), ("c1111027379186", 4, u'上地西里'))
-	# village_infos = (("c1111027378224", 9, u'莱圳家园'), ("c1111027374195", 7, u'枫丹丽舍'))
+	village_infos = (
+		('c1111027378224', 9, u'莱圳家园'), ('c1111027374195', 7, u'枫丹丽舍'), ('c1111027374615', 5, u'观景园'), ('c1111027374646', 7, u'观林园'), 
+		('c1111027376795', 11, u'当代城市家园'), ('c1111046342806', 12, u'上地东里'), ('c1111027379186', 4, u'上地西里'), ('c1111027374308',10, u'蜂鸟家园'),
+		('c1111027382146', 22, u'育新花园'), ('c1111027381078', 16, u'小南庄社区'), ('c1111027374543', 2, u'光大水墨'), ('c1111027374292', 9, u'富力桃园C区'), 
+		('c1111027376008', 16, u'保利西山林语'), ('c1111027379551', 2,  u'山水蓝维'), ('c1111027380101', 10, u'太阳公元'), ('c1111027376127', 7, u'北纬40度二期'), 
+		('c1111027376953', 15, u'慧忠里'), ('c1111027379077', 7, u'润泽悦溪'), ('c1111027382490', 18, u'珠江帝景'), ('c1111043464865', 2, u'国风美唐'),
+		('c1111027381003', 35, u'新龙城'), ('c1111027378138', 19, u'流星花园三区'), ('c1111027375871', 11, u'北京北'), ('c1111027378114', 3, u'龙腾苑五区'),
+		('c1111027380045', 10, u'天通苑本四区'), ('c1111027379515', 8, u'北街家园六区'), ('c1111043052734', 4, u'长阳半岛2号院'), 
+		('c1111027375053', 3, u'宏汇园小区'), ('c1111027376697', 4, u'车站东街15号院'), ('c1111027373865', 5, u'德胜里一区'), ('c1111027382272', 18, u'裕中西里')
+		('c1111027378023', 7, u'六铺炕二区'), ('c1111027378025', 5, u'六铺炕一区'))
+	# village_infos = (('c1111027378224', 9, u'莱圳家园'), ('c1111027374195', 7, u'枫丹丽舍'))
 
 	values = []
 	for info in village_infos:
