@@ -104,6 +104,7 @@ class LianjiaDealData:
 				elif j == k - 8:
 					if len(str) == 7:
 						str = str + '.01'
+
 					value.append(str)
 					m = m + 1
 				elif j in arr:
@@ -112,7 +113,8 @@ class LianjiaDealData:
 					m = m + 1
 				# update str index to next column
 				j = j + 1
-			values.append(value)
+			if len(value) == 9:
+				values.append(value)
 			# update row index to the next row
 			n = n + 1
 		self.logger.info('%s rows data has been collected; the length of list stores the collected data is %s' % (n, len(values)))
@@ -123,7 +125,7 @@ class LianjiaDealData:
 	def get_response(self, url):
 		# add header to avoid get 403 fobbiden message
 		i_headers = {'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:41.0) Gecko/20100101 Firefox/41.0',
-					'Cookie': 'lianjia_uuid=13b925fd-319a-427e-9194-926b8b62f449;lianjia_token=1.0098cd0327081814a8a234148c290c4ac6'}
+					'Cookie': 'lianjia_uuid=2ebbfb89-6086-41ba-8c8b-06299a4ef5c8; lianjia_token=1.0092e5f86f1e8105f63d6d6fd4d79d9738'}
 		request = urllib2.Request(url, headers = i_headers)
 
 		try:
@@ -188,7 +190,7 @@ class LianjiaDealData:
 if __name__ == '__main__':
 	ljDealData = LianjiaDealData()
 
-	#village_infos = (('c1111027378224', 1, u'莱圳家园'), ('c1111027374195', 1, u'枫丹丽舍'))
+	# village_infos = (('c1111027378224', 1, u'莱圳家园'), ('c1111027374195', 1, u'枫丹丽舍'))
 
 	village_infos = (
 		('c1111027378224', 9, u'莱圳家园'), ('c1111027374195', 7, u'枫丹丽舍'), ('c1111027374615', 5, u'观景园'), ('c1111027374646', 7, u'观林园'), 
