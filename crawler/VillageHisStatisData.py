@@ -54,18 +54,25 @@ class VillageHisStatisData:
 		# /html/body/div[6]/div[2]/div[2]/ul/li[1]/span[2]
 		# /html/body/div[6]/div[2]/div[2]/ul/li[3]/span[2]
 		#statis_data = soup.select('div.wapper div.secondcon span.botline')
-		values.append(village_name)
+		values.append(village_name)		
 
-		# get statistic data
-		statis_data = soup.find('div', {'class': 'secondcon fl'}).findAll('span', {'class': 'botline'})
-		for data in statis_data:
-			if i == 3:
-				values.append(data.find('strong').string)
-				break
-			for item in data.find('a'):
-				values.append(item)
+		# get average unit price and sale in last 90 days
+		statis_data = soup.find('div', {'id': 'priceSideBarContainer'}).findAll('span', {'class': 'botline'})
 
-			i = i + 1
+		# get average unit price
+		unit_price = statis_data.find('a').find('span').string
+		values.append(unit_price)
+
+		# get total on sale house number
+		onsale_num = soup.find('div', {'class': 'resultDes clear'}).find('h2').find('span').string
+		values.append(onsale_num)
+
+		# get sale in last 90 days
+		saled = statis_data.find('div', {'class': 'info'}).find('a')[1].string
+		values.append(saled)
+
+		# could not get daikan, so set to 0
+		values.append(0)
 
 		self.logger.debug('The statistics data got for %s is: %s ' % (village_name, values) )
 		return values

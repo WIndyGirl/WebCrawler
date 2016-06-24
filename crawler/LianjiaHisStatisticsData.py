@@ -52,23 +52,24 @@ class LianjiaHisStatisticsData:
 		values = [datetime.date.today()]
 
 		i = 0
-		data_container = soup.find('div', {'class': 'display-block fl'})
+		data_container = soup.find('div', {'class': 'wrap'})
 		# get on sale and saled house data
-		sale_data = data_container.find('div', {'class': 'view'}).find('div', {'class': 'last'})
+		sale_data = data_container.find('div', {'class': 'box-l-t'}).find('div', {'class': 'qushi-2'}).findAll('a')
 		for data in sale_data.strings:
-			# i == 2: data = '在售房源78846套'
-			if i == 2:
+			# i == 0: data = '在售房源78846套'
+			if i == 0:
 				values.append(re.sub("\D", "", data))
-			# i == 3: data = '最近90天内成交房源35399套'
-			elif i == 3:
+			# i == 1: data = '最近90天内成交房源35399套'
+			elif i == 1:
 				values.append(re.sub("\D", "", data)[2:])
 			i = i + 1
 
 		# get statistics data on yesterday
-		statis_data = data_container.find('div', {'class': 'bottom'}).findAll('span')
+		i = 0
+		statis_data = data_container.find('div', {'class': 'box-l-b'}).findAll('div', {'class': 'num'})
 		for data in statis_data:
-			if i in (7, 9):
-				values.append(data.string)
+			if i > 0:
+				values.append(data.find('span').string)
 			i = i + 1
 
 		# get daily new customer data and new house data
