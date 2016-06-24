@@ -12,6 +12,7 @@ import xlwt
 import xlrd
 from xlutils.copy import copy
 from bs4 import BeautifulSoup
+import json
 
 import db.mysql.VillageHisStatisDataHandler as VillageHisStatisDataHandler
 from db.mysql.DBHandler import DBHandler
@@ -57,10 +58,10 @@ class VillageHisStatisData:
 		values.append(village_name)	
 
 		# get total on sale house number
-		onsale_num = soup.find('div', {'class': 'resultDes clear'}).find('h2').find('span').string
+		onsale_num = soup.find('div', {'class': 'resultDes clear'}).find('h2').find('span').string.strip()
 
 		# get average unit price and sale in last 90 days
-		url = 'http://m.api.lianjia.com/web/ershoufang/sidebar?cityId=110000&id=%s&uuid=54fca846-4a1b-470c-9ec4-0a8647c5c68e&ucid=&type=resblock' % village_id
+		url = 'http://m.api.lianjia.com/web/ershoufang/sidebar?cityId=110000&id=%s&uuid=54fca846-4a1b-470c-9ec4-0a8647c5c68e&ucid=&type=resblock' % village_id[1:]
 		res_json = json.load(self.get_response(url))
 
 		# get average unit price
