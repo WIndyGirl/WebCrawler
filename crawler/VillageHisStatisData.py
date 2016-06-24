@@ -45,7 +45,7 @@ class VillageHisStatisData:
 
 		return soup
 
-	def get_statistics_data(self, url, village_name):
+	def get_statistics_data(self, url, village_id, village_name):
 		soup = self.get_home_page_data(url)
 		values = [datetime.date.today()]
 
@@ -54,22 +54,24 @@ class VillageHisStatisData:
 		# /html/body/div[6]/div[2]/div[2]/ul/li[1]/span[2]
 		# /html/body/div[6]/div[2]/div[2]/ul/li[3]/span[2]
 		#statis_data = soup.select('div.wapper div.secondcon span.botline')
-		values.append(village_name)		
-
-		# get average unit price and sale in last 90 days
-		statis_data = soup.find('div', {'id': 'priceSideBarContainer'}).findAll('span', {'class': 'botline'})
-
-		# get average unit price
-		unit_price = statis_data.find('a').find('span').string
-		values.append(unit_price)
+		values.append(village_name)	
 
 		# get total on sale house number
 		onsale_num = soup.find('div', {'class': 'resultDes clear'}).find('h2').find('span').string
-		values.append(onsale_num)
 
+		# get average unit price and sale in last 90 days
+		url = 'http://m.api.lianjia.com/web/ershoufang/sidebar?cityId=110000&id=%s&uuid=54fca846-4a1b-470c-9ec4-0a8647c5c68e&ucid=&type=resblock' % village_id
+		res_json = json.load(self.get_response(url))
+
+		# get average unit price
+		unit_price = res_json['data']['price']['month_trans']
+		
 		# get sale in last 90 days
-		saled = statis_data.find('div', {'class': 'info'}).find('a')[1].string
-		values.append(saled)
+		sold = res_json['data']['price']['sold_90_day']
+
+		values.append(unit_price)
+		values.append(onsale_num)
+		values.append(sold)
 
 		# could not get daikan, so set to 0
 		values.append(0)
@@ -149,7 +151,7 @@ if __name__ == '__main__':
 	for info in village_infos:
 		# info = village_infos[0]
 		url = common_url + info[0]
-		value = hisStatisData.get_statistics_data(url, info[2])
+		value = hisStatisData.get_statistics_data(url, info[0],info[2])
 
 		values.append(value)
 

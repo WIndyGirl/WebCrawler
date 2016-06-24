@@ -55,13 +55,13 @@ class LianjiaHisStatisticsData:
 		data_container = soup.find('div', {'class': 'wrap'})
 		# get on sale and saled house data
 		sale_data = data_container.find('div', {'class': 'box-l-t'}).find('div', {'class': 'qushi-2'}).findAll('a')
-		for data in sale_data.strings:
+		for data in sale_data:
 			# i == 0: data = '在售房源78846套'
 			if i == 0:
-				values.append(re.sub("\D", "", data))
+				values.append(re.sub("\D", "", data.string))
 			# i == 1: data = '最近90天内成交房源35399套'
 			elif i == 1:
-				values.append(re.sub("\D", "", data)[2:])
+				values.append(re.sub("\D", "", data.string)[2:])
 			i = i + 1
 
 		# get statistics data on yesterday
