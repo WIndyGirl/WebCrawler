@@ -13,6 +13,7 @@ import xlrd
 from xlutils.copy import copy
 from bs4 import BeautifulSoup
 import json
+import re
 
 import db.mysql.VillageHisStatisDataHandler as VillageHisStatisDataHandler
 from db.mysql.DBHandler import DBHandler
@@ -58,14 +59,14 @@ class VillageHisStatisData:
 		#statis_data = soup.select('div.wapper div.secondcon span.botline')
 
 		data_container = soup.find('div', {'class': 'wrap'})
-		qushi-2 = data_container.find('div', {'class': 'box-l-t'}).find('div', {'class': 'qushi-2'})
+		qushi = data_container.find('div', {'class': 'box-l-t'}).find('div', {'class': 'qushi-2'})
 
 		# get average unit price 
-		unit_price = qushi-2.find('span', {'id': ''}).string
+		unit_price = qushi.find('span', {'id': 'monthTrans'}).string
 		values.append(unit_price)
 
 		# get on sale and saled house data
-		sale_data = qushi-2.findAll('a')
+		sale_data = qushi.findAll('a')
 		for data in sale_data:
 			# i == 0: data = '在售房源53套'
 			if i == 0:
