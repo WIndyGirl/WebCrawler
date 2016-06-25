@@ -46,36 +46,42 @@ class VillageHisStatisData:
 
 		return soup
 
-	def get_statistics_data(self, url, village_id, village_name):
+	def get_statistics_data(self, url, village_name):
 		soup = self.get_home_page_data(url)
 		values = [datetime.date.today()]
+		values.append(village_name)	
 
 		i = 0
 		# get on sale and saled house data
 		# /html/body/div[6]/div[2]/div[2]/ul/li[1]/span[2]
 		# /html/body/div[6]/div[2]/div[2]/ul/li[3]/span[2]
 		#statis_data = soup.select('div.wapper div.secondcon span.botline')
-		values.append(village_name)	
 
-		# get total on sale house number
-		onsale_num = soup.find('div', {'class': 'resultDes clear'}).find('h2').find('span').string.strip()
+		data_container = soup.find('div', {'class': 'wrap'})
+		qushi-2 = data_container.find('div', {'class': 'box-l-t'}).find('div', {'class': 'qushi-2'})
 
-		# get average unit price and sale in last 90 days
-		url = 'http://m.api.lianjia.com/web/ershoufang/sidebar?cityId=110000&id=%s&uuid=54fca846-4a1b-470c-9ec4-0a8647c5c68e&ucid=&type=resblock' % village_id[1:]
-		res_json = json.load(self.get_response(url))
-
-		# get average unit price
-		unit_price = res_json['data']['price']['month_trans']
-		
-		# get sale in last 90 days
-		sold = res_json['data']['price']['sold_90_day']
-
+		# get average unit price 
+		unit_price = qushi-2.find('span', {'id': ''}).string
 		values.append(unit_price)
-		values.append(onsale_num)
-		values.append(sold)
 
-		# could not get daikan, so set to 0
-		values.append(0)
+		# get on sale and saled house data
+		sale_data = qushi-2.findAll('a')
+		for data in sale_data:
+			# i == 0: data = '在售房源53套'
+			if i == 0:
+				values.append(re.sub("\D", "", data.string))
+			# i == 1: data = '最近90天内成交房源13套'
+			elif i == 1:
+				values.append(re.sub("\D", "", data.string)[2:])
+			i = i + 1
+
+		# get chengjia in last 30 days and daikan in last 30 days
+		i = 0
+		statis_data = data_container.find('div', {'class': 'box-l-b'}).findAll('div', {'class': 'num'})
+		for data in statis_data:
+			if i > 0:
+				values.append(data.find('span').string)
+			i = i + 1
 
 		self.logger.debug('The statistics data got for %s is: %s ' % (village_name, values) )
 		return values
@@ -122,7 +128,7 @@ class VillageHisStatisData:
 		work_book = xlwt.Workbook(style_compression=2)
 		sheet1 = work_book.add_sheet(sheet_name, cell_overwrite_ok=True)
 
-		row0 = [u'记录时间', u'小区名称', u'成交均价', u'在售房源', u'90天成交房源', u'30天带看量' ]
+		row0 = [u'记录时间', u'小区名称', u'成交均价', u'在售房源', u'90天成交房源', u'30天成交房源', u'30天带看量' ]
 		# write the first row
 		for i in range(0,len(row0)):
 			sheet1.write(0,i,row0[i],self.set_style('Times New Roman',220,True))
@@ -135,7 +141,7 @@ class VillageHisStatisData:
 if __name__ == '__main__':
 	hisStatisData = VillageHisStatisData()
 
-	common_url = 'http://bj.lianjia.com/ershoufang/'
+	common_url = 'http://bj.lianjia.com/fangjia/'
 	village_infos = (
 		('c1111027378224', 9, u'莱圳家园'), ('c1111027374195', 7, u'枫丹丽舍'), ('c1111027374615', 5, u'观景园'), ('c1111027374646', 7, u'观林园'), 
 		('c1111027376795', 11, u'当代城市家园'), ('c1111046342806', 12, u'上地东里'), ('c1111027379186', 4, u'上地西里'), ('c1111027374308',10, u'蜂鸟家园'),
@@ -152,7 +158,7 @@ if __name__ == '__main__':
 	for info in village_infos:
 		# info = village_infos[0]
 		url = common_url + info[0]
-		value = hisStatisData.get_statistics_data(url, info[0],info[2])
+		value = hisStatisData.get_statistics_data(url, info[2])
 
 		values.append(value)
 
