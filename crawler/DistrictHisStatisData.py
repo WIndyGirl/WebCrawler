@@ -15,8 +15,8 @@ from bs4 import BeautifulSoup
 import json
 import re
 
-# import db.mysql.DistrictHisStatisDataHandler as DistrictHisStatisDataHandler
-# from db.mysql.DBHandler import DBHandler
+import db.mysql.DistrictHisStatisDataHandler as DistrictHisStatisDataHandler
+from db.mysql.DBHandler import DBHandler
 from lib.Logger import Logger
 
 class DistrictHisStatisData:
@@ -162,8 +162,8 @@ class DistrictHisStatisData:
 
 		work_book.save(file_name)
 
-	# def record_into_db(self, conn, values):
-	# 	DistrictHisStatisDataHandler.insert_district_his_statistics_data(conn, values)
+	def record_into_db(self, conn, values):
+		DistrictHisStatisDataHandler.insert_district_his_statistics_data(conn, values)
 
 if __name__ == '__main__':
 	hisStatisData = DistrictHisStatisData()
