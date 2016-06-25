@@ -180,7 +180,6 @@ if __name__ == '__main__':
 	for info in district_infos:
 		# info = village_infos[0]
 		url = common_url + info[0]
-		print info[1]
 		value = hisStatisData.get_statistics_data(url, info[1])
 
 		values.append(value)
