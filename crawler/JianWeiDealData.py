@@ -14,8 +14,8 @@ import xlrd
 from xlutils.copy import copy
 from bs4 import BeautifulSoup
 
-# import db.mysql.JianWeiDealDataHandler as JianWeiDealDataHandler
-# from db.mysql.DBHandler import DBHandler
+import db.mysql.JianWeiDealDataHandler as JianWeiDealDataHandler
+from db.mysql.DBHandler import DBHandler
 from lib.Logger import Logger
 
 class JianWeiDealData:
@@ -74,18 +74,24 @@ class JianWeiDealData:
 
 	def get_data(self, url):
 		soup = self.get_page_html(url)
-		values = [datetime.date.today()]
-		print soup
+		day = datetime.date.today() - datetime.timedelta(days=1)
+		values = [day]
 
-		content = soup.find('div', {'class': 'container'})
-		# .find('div', {'class': 'box1000'}).find('div', {'class': 'boxconn'})
-		# print content
-		#.find('div', {'class': 'tContent'}).findAll('tbody')
-		# i = 0;
-		# for tbody in content:
-		# 	print i, tdoby
-		# 	i = i + 1			
+		tables = soup.findAll('table', {'class': 'tjInfo'})
+		
+		i = 0
+		for table in tables:
+			if (i == 1):
+				i = i + 1
+				continue
 
+			tds = table.findAll('td')
+			for td in tds:
+				values.append(td.string)	
+			i = i + 1	
+
+		self.logger.debug('JianWei Deal data at %s is: %s ' % (day, values) )
+		return values		
 
 	def write_to_excel(self, file_name, values):
 		work_book = xlrd.open_workbook(file_name)
@@ -95,8 +101,7 @@ class JianWeiDealData:
 		sheet1 = nwb.get_sheet(0)
 
 		for i in range(0, len(values)):
-			for j in range(0,len(values[i])):
-				sheet1.write(row_num + i, j, values[i][j], self.set_style('Times New Roman',220,True))
+			sheet1.write(row_num, i, values[i], self.set_style('Times New Roman',220,True))
 
 		nwb.save(file_name)
 
@@ -113,7 +118,7 @@ class JianWeiDealData:
 		work_book.save(file_name)
 
 	def record_into_db(self, values, conn):
-		JianWeiDealDataHandler.insert_deal_data(conn, values)
+		JianWeiDealDataHandler.insert_jianwei_deal_data(conn, values)
 
 if __name__ == '__main__':
 	JWDealData = JianWeiDealData()
@@ -126,23 +131,23 @@ if __name__ == '__main__':
 	Write to Excel
 	'''
 	# create workbook
-	# work_book = xlwt.Workbook(style_compression=2)
+	work_book = xlwt.Workbook(style_compression=2)
 
-	# # create excel file
+	# create excel file
 	# JWDealData.create_excel('../docs/JianWeiDealData.xls', 'sheet1')
 	# # write data into excel
 	# JWDealData.write_to_excel('../docs/JianWeiDealData.xls', values)
 
-	# '''
-	# Record in db
-	# '''
-	# dbHandler = DBHandler()
-	# # create db connection
-	# conn = dbHandler.get_db_conn('house_data', 'root', 'passw0rd')
-	# # get data and insert into db	
-	# JWDealData.record_into_db(values, conn)
+	'''
+	Record in db
+	'''
+	dbHandler = DBHandler()
+	# create db connection
+	conn = dbHandler.get_db_conn('house_data', 'root', 'passw0rd')
+	# get data and insert into db	
+	JWDealData.record_into_db(values, conn)
 
-	# dbHandler.close_db_conn(conn)
+	dbHandler.close_db_conn(conn)
 
 
 
